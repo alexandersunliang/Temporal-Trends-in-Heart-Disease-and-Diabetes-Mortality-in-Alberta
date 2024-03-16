@@ -9,36 +9,40 @@
 
 #### Workspace setup ####
 library(tidyverse)
+library(janitor)
+library(knitr)
 
 #### Clean data ####
-raw_data <- read_csv("inputs/data/plane_data.csv")
-
-cleaned_data <-
-  raw_data |>
-  janitor::clean_names() |>
-  select(wing_width_mm, wing_length_mm, flying_time_sec_first_timer) |>
-  filter(wing_width_mm != "caw") |>
-  mutate(
-    flying_time_sec_first_timer = if_else(flying_time_sec_first_timer == "1,35",
-                                   "1.35",
-                                   flying_time_sec_first_timer)
+#Filter the data by 
+clean_data <-
+  read_csv(
+    "data/raw_data/raw-data-leading-causes-of-death.csv",
+    skip = 2,
+    col_types = cols(
+      `Calendar Year` = col_integer(),
+      Cause = col_character(),
+      Ranking = col_integer(),
+      `Total Deaths` = col_integer()
+    )
   ) |>
-  mutate(wing_width_mm = if_else(wing_width_mm == "490",
-                                 "49",
-                                 wing_width_mm)) |>
-  mutate(wing_width_mm = if_else(wing_width_mm == "6",
-                                 "60",
-                                 wing_width_mm)) |>
-  mutate(
-    wing_width_mm = as.numeric(wing_width_mm),
-    wing_length_mm = as.numeric(wing_length_mm),
-    flying_time_sec_first_timer = as.numeric(flying_time_sec_first_timer)
-  ) |>
-  rename(flying_time = flying_time_sec_first_timer,
-         width = wing_width_mm,
-         length = wing_length_mm
-         ) |> 
-  tidyr::drop_na()
+  clean_names() |>
+  add_count(cause) |>
+  mutate(cause = str_trunc(cause, 30))
 
+# Filter the dataset
+filtered_data <- clean_data %>%
+  filter(cause %in% c("All other forms of chronic ...", 
+                      "Acute myocardial infarction", 
+                      "Atherosclerotic cardiovascu...", 
+                      "Diabetes mellitus", 
+                      "Congestive heart failure")) %>%
+  filter(calendar_year >= 2016 & calendar_year <= 2021)
+
+# View the filtered dataset
+print(filtered_data)
+
+# Remove all empty data 
+clean_data <- na.omit(clean_data)
 #### Save data ####
-write_csv(cleaned_data, "outputs/data/analysis_data.csv")
+write_csv(clean_data, "data/analysis_data/analysis_data.csv")
+write_csv(filtered_data, "data/analysis_data/analysis_data.csv")

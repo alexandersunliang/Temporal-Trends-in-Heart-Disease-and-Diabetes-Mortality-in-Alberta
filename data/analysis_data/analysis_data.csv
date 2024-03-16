@@ -1,20 +1,31 @@
-width,length,flying_time
-70,111,1.83
-57,127,2.32
-59,92,2.05
-70,75,1.1
-62,112,2.32
-68,103.5,0.5
-58,108,1.7
-79,114,0.86
-56,186,3.42
-87,68,1.37
-50,118,2.68
-49,186,1.83
-61,116,1.32
-60,127,1
-56,184,2.79
-69,124,1.4
-60,95,1.12
-44,137,1.28
-63,125,1.35
+calendar_year,cause,ranking,total_deaths,n
+2016,All other forms of chronic ...,2,1626,22
+2016,Acute myocardial infarction,4,1102,22
+2016,Atherosclerotic cardiovascu...,6,885,22
+2016,Diabetes mellitus,9,502,22
+2016,Congestive heart failure,16,352,22
+2017,All other forms of chronic ...,2,1678,22
+2017,Acute myocardial infarction,5,1028,22
+2017,Atherosclerotic cardiovascu...,6,817,22
+2017,Diabetes mellitus,9,584,22
+2017,Congestive heart failure,15,374,22
+2018,All other forms of chronic ...,2,1788,22
+2018,Acute myocardial infarction,5,1071,22
+2018,Atherosclerotic cardiovascu...,7,745,22
+2018,Diabetes mellitus,8,577,22
+2018,Congestive heart failure,16,347,22
+2019,All other forms of chronic ...,2,1886,22
+2019,Acute myocardial infarction,5,1061,22
+2019,Atherosclerotic cardiovascu...,6,678,22
+2019,Diabetes mellitus,9,569,22
+2019,Congestive heart failure,16,430,22
+2020,All other forms of chronic ...,2,1897,22
+2020,Acute myocardial infarction,7,1067,22
+2020,Diabetes mellitus,9,743,22
+2020,Atherosclerotic cardiovascu...,10,670,22
+2020,Congestive heart failure,17,387,22
+2021,All other forms of chronic ...,4,1939,22
+2021,Acute myocardial infarction,6,1075,22
+2021,Diabetes mellitus,8,728,22
+2021,Atherosclerotic cardiovascu...,15,463,22
+2021,Congestive heart failure,16,403,22

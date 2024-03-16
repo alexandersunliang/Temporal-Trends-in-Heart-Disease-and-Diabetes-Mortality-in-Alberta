@@ -1,9 +1,8 @@
 ---
-title: "My title"
+title: "Temporal Trends in Heart Disease and Diabetes Mortality in Alberta: A Negative Binomial Regression Analysis of the Impact of Fast Food Consumption"
 subtitle: "My subtitle if needed"
 author: 
-  - First author
-  - Another author
+  - Alexander Sun
 thanks: "Code and data are available at: LINK."
 date: today
 date-format: long
@@ -29,6 +28,13 @@ You can and should cross-reference sections and sub-sections. We use @citeR and 
 
 The remainder of this paper is structured as follows. @sec-data....
 
+In recent decades, the prevalence of heart disease and diabetes has surged globally, a trend paralleled by the increasing consumption of fast food. This paper focuses on Alberta, Canada, where these health challenges have become particularly pronounced. While numerous studies have linked fast food consumption to various health outcomes, few have directly examined its impact on mortality rates from heart disease and diabetes within this region. This gap in research motivates our study, which aims to analyze temporal trends in these mortality rates and discuss their potential association with the rise in fast food consumption, despite the absence of direct consumption data.
+
+Using mortality data from the Alberta government, spanning two decades, we applied negative binomial regression models to analyze changes in heart disease and diabetes mortality rates. Our findings reveal significant temporal trends in these rates, with notable increases that correspond to periods of reported national and global rises in fast food consumption. While direct causation cannot be established due to the lack of specific consumption data, the temporal correlations underscore the potential health impacts of dietary habits.
+
+The importance of this research lies in its contribution to the ongoing dialogue about public health strategies aimed at combating heart disease and diabetes. By highlighting the temporal association between increased mortality rates and the era of rising fast food consumption, this study emphasizes the need for targeted public health interventions and policies. 
+
+This paper is organized as follows: Following the introduction, the second section reviews existing literature on the relationship between diet and chronic diseases, establishing the theoretical foundation for the study. The third section describes the data and methodology, including the rationale behind the choice of negative binomial regression. The fourth section presents our findings, detailing the correlation between fast food consumption and mortality rates. The fifth section discusses the implications of these findings for public health policy and suggests directions for future research. The final section concludes the paper, summarizing the key contributions and urging for proactive measures in dietary education and regulation. Through this structured exploration, the paper contributes valuable insights into the diet-disease nexus, advocating for informed dietary choices as a cornerstone of public health.****
 
 
 # Data {#sec-data}

@@ -1,19 +1,27 @@
 #### Preamble ####
-# Purpose: Simulates... [...UPDATE THIS...]
-# Author: Rohan Alexander [...UPDATE THIS...]
-# Date: 11 February 2023 [...UPDATE THIS...]
-# Contact: rohan.alexander@utoronto.ca [...UPDATE THIS...]
+# Purpose: Simulates a dataset depicting causes of death in Alberta
+# Author: Alexander Sun
+# Date: 15 March 2024
+# Contact: alexander.sun@mail.utoronto.ca
 # License: MIT
-# Pre-requisites: [...UPDATE THIS...]
-# Any other information needed? [...UPDATE THIS...]
+# Pre-requisites: n/a
 
 
 #### Workspace setup ####
 library(tidyverse)
-# [...UPDATE THIS...]
 
 #### Simulate data ####
-# [...ADD CODE HERE...]
+set.seed(1111)
+alberta_death_simulation <-
+  tibble(
+    cause = rep(x = c("Heart", "Stroke", "Diabetes"), times = 10),
+    year = rep(x = 2016:2018, times = 10),
+    deaths = rnbinom(n = 30, size = 20, prob = 0.1)
+  )
+
+alberta_death_simulation
+summary(alberta_death_simulation)
+write_csv(alberta_death_simulation, "data/raw_data/simulated_data.csv") 
 
 
 
