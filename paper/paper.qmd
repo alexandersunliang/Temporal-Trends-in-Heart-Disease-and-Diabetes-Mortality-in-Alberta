@@ -1,6 +1,5 @@
 ---
 title: "Temporal Trends in Heart Disease and Diabetes Mortality in Alberta: A Negative Binomial Regression Analysis of the Impact of Fast Food Consumption"
-subtitle: "My subtitle if needed"
 author: 
   - Alexander Sun
 thanks: "Code and data are available at: LINK."
@@ -18,7 +17,10 @@ bibliography: references.bib
 #| message: false
 
 library(tidyverse)
-library(palmerpenguins)
+library(knitr)
+library(kableExtra)
+library(here)
+filtered_data <- read.csv(here("data/analysis_data/analysis_data.csv"))
 ```
 
 
@@ -39,52 +41,105 @@ This paper is organized as follows: Following the introduction, the second secti
 
 # Data {#sec-data}
 
-Some of our data is of penguins (@fig-bills), from @palmerpenguins.
+## Data source
+This analysis will be carried out in **R** @R using packages **tidyverse** @tidyverse, **dplyr** @dplyr, **ggplot2** @ggplot2, **knitr** @knitr. The data set used in this paper is called Leading causes of death and was collected from the Alberta Provincial Government. The data set consists of a ranking of the 30 most common causes of death each year in Alberta. The data covers the last two decades, but for our research purpose we will focus on the last five years.
 
+## Broader Context of the Dataset
+The availability of detailed public health data, such as the mortality statistics from Alberta, is crucial for the formulation of informed public health policies and strategies. Within the broader Canadian context, Alberta's commitment to data transparency enables a deeper analysis of health trends and outcomes, serving as a model for other provinces and territories. The analysis of mortality data plays a pivotal role in identifying health trends, assessing the burden of diseases, and planning public health interventions. By focusing on specific causes of death, researchers and policymakers can tailor strategies to target the underlying factors contributing to these trends, ultimately aiming to improve health outcomes and reduce preventable deaths.
+
+## Variables
+The dataset comprises several key variables, central to this study's focus on heart disease and diabetes mortality rates:
+
+Causes of Death: Specifically, the dataset categorizes mortality into detailed causes, including:
+
+- **All Other Forms of Ischemic Heart Disease**: This category encompasses various conditions related to reduced blood flow to the heart muscle, excluding acute myocardial infarction.
+- **Acute Myocardial Infarction (Heart Attack)**: Fatalities resulting directly from heart attack incidents.
+- **Atherosclerotic Cardiovascular Disease**: Deaths caused by atherosclerosis, a condition characterized by the hardening and narrowing of the arteries due to plaque buildup, leading to cardiovascular problems.
+- **Diabetes Mellitus**: Mortality attributed to complications arising from diabetes, a chronic condition affecting blood sugar regulation.
+- **Congestive Heart Failure**: Deaths resulting from the heart's inability to pump blood effectively, often a consequence of other heart conditions.
+
+These five causes of death were chosen due to their correlation with unhealthy diets. We collected the recorded total deaths in Alberta from each of the above variables from 2016-2021 inclusive. This is shown in the table above.
 ```{r}
-#| label: fig-bills
-#| fig-cap: Bills of penguins
 #| echo: false
-
-ggplot(penguins, aes(x = island, fill = species)) +
-  geom_bar(alpha = 0.8) +
-  scale_fill_manual(values = c("darkorange","purple","cyan4"),
-                    guide = "none") +
-  theme_minimal() +
-  facet_wrap(~species, ncol = 1) +
-  coord_flip()
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+summary_table <- tibble(
+  Year = rep(2016:2021, times = 5),
+  Cause_of_Death = rep(c("Acute Myocardial Infarction",
+                         "All Other Forms of Ischemic Heart Disease",
+                         "Atherosclerotic Cardiovascular Disease",
+                         "Diabetes Mellitus",
+                         "Congestive Heart Failure"), each = 6),
+  Total_Deaths = c(1102, 1028, 1071, 1061, 1067, 1075,       
+                   1626, 1678, 1788, 1886, 1897, 1939,  
+                   885, 817, 630, 745, 678, 463,       
+                   502, 584, 577, 569, 743, 728, 
+                   352, 374, 347, 430, 387, 403)       
+) %>%
+  pivot_wider(names_from = Cause_of_Death, values_from = Total_Deaths) %>%
+  select(Year, "Acute Myocardial Infarction", "All Other Forms of Ischemic Heart Disease",
+         "Atherosclerotic Cardiovascular Disease", "Diabetes Mellitus", "Congestive Heart Failure")
+kable(summary_table, format = "latex", booktabs = TRUE, caption = "Annual Deaths by Cause (2016-2021)") %>%
+  kable_styling(latex_options = c("striped", "scale_down"))
 ```
 
-Talk more about it.
+## Data Preparation and Cleaning
+The dataset was filtered to isolate deaths attributed to our causes of interest: acute myocardial infarction, all other forms of ischemic heart disease, atherosclerotic cardiovascular disease, diabetes mellitus, and congestive heart failure. This selection was crucial to align our study with its objectives, ensuring a focused examination of these specific health outcomes. Subsequently, we removed all missing values from the dataset. The final data points were compiled for use in our analysis later in the paper.
 
-And also planes (@fig-planes). (You can change the height and width, but don't worry about doing that until you have finished every other aspect of the paper - Quarto will try to make it look nice and the defaults usually work well once you have enough text.)
-
+## Preliminary Observations and Exploration
+Our initial analysis revealed several notable observations. First, the trend analysis suggested a correlation between the years and mortality rates for specific causes of death, hinting at the possible influence of external factors such as healthcare policies or changes in societal health behaviors. Since we are looking at a five-year span from 2016 to 2021, the onset of the COVID-19 pandemic introduced a plethora of health-related policies and regulations that may significantly impact our data. In the figure below, we plotted the total deaths from each of the causes to visualize if there were any spikes in the data.
 ```{r}
-#| label: fig-planes
-#| fig-cap: Relationship between wing length and width
 #| echo: false
-#| warning: false
-#| message: false
+library(tidyverse)
 
-analysis_data <- read_csv(here::here("data/analysis_data/analysis_data.csv"))
-
-analysis_data |> 
-  ggplot(aes(x = width, y = length)) +
-  geom_point(alpha = 0.8) +
-  theme_minimal() +
-  labs(x = "Wing width (mm)",
-       y = "Wing length (mm)")
+# Assuming filtered_data is your data frame with the specified variables
+ggplot(filtered_data, aes(x = calendar_year, y = total_deaths, color = cause, group = cause)) +
+  geom_line() + # Draw lines
+  geom_point() + # Add points to the lines
+  theme_minimal() + # Use a minimal theme for aesthetics
+  labs(
+    title = "Trends in Total Deaths by Cause (2016-2021)",
+    x = "Calendar Year",
+    y = "Total Deaths Per Year",
+    color = "Cause of Death"
+  ) +
+  scale_x_continuous(breaks = seq(min(filtered_data$calendar_year), max(filtered_data$calendar_year), by = 1)) # Ensure every year is shown
 ```
-
-Talk way more about it. 
-
-
+From the graph depicted above, we see that although most causes kept their total death count per year roughly the same, Diabetes saw a noticeable spike form 2020 onwards and Atheroscleratic cardiovascular disease saw a significant decrease. 
 
 # Model
 
-The goal of our modelling strategy is twofold. Firstly,...
+In our analysis of the association between the total number of deaths and significant causes of death in Alberta, we employed two distinct regression models to facilitate our predictions: the Poisson model and the Negative Binomial model. Both models are well-suited for analyzing count data, where the goal is to explore the relationship between several independent variables (predictors) and a dependent variable (count outcomes). In the context of our study, the independent variables are the causes of death, including "Acute Myocardial Infarction," "All Other Forms of Ischemic Heart Disease," "Atherosclerotic Cardiovascular Disease," "Diabetes Mellitus," and "Congestive Heart Failure." These variables serve as predictors for our dependent variable, which is the count of deaths per year in Alberta from 2016 to 2021.
 
-Here we briefly describe the Bayesian analysis model used to investigate... Background details and diagnostics are included in [Appendix -@sec-model-details].
+## Poisson Model
+The Poisson regression model is characterized by its simplicity and efficiency in modeling the count data. It assumes that the event occurrence rate is constant across the observed period and that these events occur independently of each other. Despite its advantages, the Poisson model may fall short in handling overdispersion, where the variance exceeds the mean in the count data.
+$$
+y_i | \lambda_i \sim \text{Poisson}(\lambda_i)
+$$
+$$
+\log(\lambda_i) = \alpha + \beta_1 \times \text{AMI}_i + \beta_2 \times \text{OtherIHD}_i + \beta_3 \times \text{ASCVD}_i + \beta_4 \times \text{Diabetes}_i + \beta_5 \times \text{CHF}_i
+$$
+where:
+
+- $y_i$ is the count of deaths due to the $i$-th cause.
+- $\lambda_i$ is the expected count of deaths for the $i$-th cause.
+- $\alpha$, $\beta_1$, $\beta_2$, $\beta_3$, $\beta_4$, and $\beta_5$ are the model parameters to be estimated.
+- AMI, OtherIHD, ASCVD, Diabetes, and CHF are abbreviations of our previously selected variables.
+
+## Negative Binomial Model
+To address potential overdispersion in our data, we also applied the Negative Binomial regression model. This model extends the Poisson by introducing an extra parameter to account for the overdispersion, offering a more flexible approach to fit our data. The formulation of the Negative Binomial model is:
+
+\begin{align}
+y_i|\mu_i, \theta &\sim \text{NegativeBinomial}(\mu_i, \theta) \\
+\log(\mu_i) & = \beta_0 + \beta_1 \cdot x_i
+\end{align}
+
+In this model, $y_i$ again denotes the total number of deaths, with $\mu_i$ being the expected count adjusted for overdispersion through the dispersion parameter $\theta$. The coefficients $\beta_0$ (intercept) and $\beta_1$ (effect of causes of death) follow a Normal distribution with a mean of 0 and a standard deviation of 2.5, providing a prior belief about the distribution of our parameters.
+
+Given the observed overdispersion in our dataset, the Negative Binomial model is anticipated to offer a more accurate and reliable fit compared to the Poisson model. By incorporating the extra dispersion parameter, it allows us to better capture the variability in death counts across different causes, providing a nuanced understanding of how each cause contributes to overall mortality.
+
+In applying these models, we aim to discern the relative impact of specified causes of death on the total number of deaths, while also accounting for the distributional characteristics of our count data. Through this comparative analysis, we seek to identify the most suitable model for our dataset, thereby enhancing the reliability of our findings and conclusions.
 
 ## Model set-up
 
@@ -175,26 +230,7 @@ In @fig-ppcheckandposteriorvsprior-1 we implement a posterior predictive check. 
 
 In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. This shows... 
 
-```{r}
-#| eval: true
-#| echo: false
-#| message: false
-#| warning: false
-#| label: fig-ppcheckandposteriorvsprior
-#| layout-ncol: 2
-#| fig-cap: "Examining how the model fits, and is affected by, the data"
-#| fig-subcap: ["Posterior prediction check", "Comparing the posterior with the prior"]
 
-pp_check(first_model) +
-  theme_classic() +
-  theme(legend.position = "bottom")
-
-posterior_vs_prior(first_model) +
-  theme_minimal() +
-  scale_color_brewer(palette = "Set1") +
-  theme(legend.position = "bottom") +
-  coord_flip()
-```
 
 ## Diagnostics
 

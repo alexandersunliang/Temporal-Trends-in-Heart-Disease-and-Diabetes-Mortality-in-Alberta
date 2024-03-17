@@ -38,11 +38,21 @@ filtered_data <- clean_data %>%
                       "Congestive heart failure")) %>%
   filter(calendar_year >= 2016 & calendar_year <= 2021)
 
+filtered_data <- filtered_data %>%
+  mutate(cause = case_when(
+    cause == "All other forms of chronic ..." ~ "All Other Forms of Ischemic Heart Disease",
+    cause == "Acute myocardial infarction" ~ "Acute Myocardial Infarction",
+    cause == "Atherosclerotic cardiovascu..." ~ "Atherosclerotic Cardiovascular Disease",
+    cause == "Diabetes mellitus" ~ "Diabetes Mellitus",
+    cause == "Congestive heart failure" ~ "Congestive Heart Failure",
+    TRUE ~ cause # Default case to keep cause as is if none of the above matches
+  ))
+
+
 # View the filtered dataset
 print(filtered_data)
 
 # Remove all empty data 
-clean_data <- na.omit(clean_data)
+filtered_data <- na.omit(filtered_data)
 #### Save data ####
-write_csv(clean_data, "data/analysis_data/analysis_data.csv")
 write_csv(filtered_data, "data/analysis_data/analysis_data.csv")
