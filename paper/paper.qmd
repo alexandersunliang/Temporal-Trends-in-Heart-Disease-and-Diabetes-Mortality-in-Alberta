@@ -131,28 +131,18 @@ where:
 To address potential overdispersion in our data, we also applied the Negative Binomial regression model. This model extends the Poisson by introducing an extra parameter to account for the overdispersion, offering a more flexible approach to fit our data. The formulation of the Negative Binomial model is:
 
 \begin{align}
-y_i|\mu_i, \theta &\sim \text{NegativeBinomial}(\mu_i, \theta) \\
-\log(\mu_i) & = \beta_0 + \beta_1 \cdot x_i
+y_i | \mu_i, \phi &\sim \text{NegBin}(\mu_i, \phi) \\
+\mu_i &= \exp(\alpha + \beta x_i) \\
+\alpha &\sim \text{Normal}(0, 2.5) \\
+\beta &\sim \text{Normal}(0, 2.5) \\
+\phi &\sim \text{Exponential}(1)
 \end{align}
 
-In this model, $y_i$ again denotes the total number of deaths, with $\mu_i$ being the expected count adjusted for overdispersion through the dispersion parameter $\theta$. The coefficients $\beta_0$ (intercept) and $\beta_1$ (effect of causes of death) follow a Normal distribution with a mean of 0 and a standard deviation of 2.5, providing a prior belief about the distribution of our parameters.
+In this model, $y_i$ again denotes the total number of deaths per year, with $\mu_i$ being the expected count adjusted for overdispersion through the dispersion parameter $\theta$. We assume the coefficients like causes of death follow a normal distribution.
 
 Given the observed overdispersion in our dataset, the Negative Binomial model is anticipated to offer a more accurate and reliable fit compared to the Poisson model. By incorporating the extra dispersion parameter, it allows us to better capture the variability in death counts across different causes, providing a nuanced understanding of how each cause contributes to overall mortality.
 
 In applying these models, we aim to discern the relative impact of specified causes of death on the total number of deaths, while also accounting for the distributional characteristics of our count data. Through this comparative analysis, we seek to identify the most suitable model for our dataset, thereby enhancing the reliability of our findings and conclusions.
-
-## Model set-up
-
-Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta_i$ is the wing width and $\gamma_i$ is the wing length, both measured in millimeters.  
-
-\begin{align} 
-y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
-\mu_i &= \alpha + \beta_i + \gamma_i\\
-\alpha &\sim \mbox{Normal}(0, 2.5) \\
-\beta &\sim \mbox{Normal}(0, 2.5) \\
-\gamma &\sim \mbox{Normal}(0, 2.5) \\
-\sigma &\sim \mbox{Exponential}(1)
-\end{align}
 
 We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`.
 
