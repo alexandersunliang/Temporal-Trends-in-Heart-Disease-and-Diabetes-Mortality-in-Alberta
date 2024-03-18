@@ -13,21 +13,27 @@ library(tidyverse)
 library(rstanarm)
 
 #### Read data ####
-analysis_data <- read_csv("data/analysis_data/analysis_data.csv")
+filtered_data <- read.csv(here("data/analysis_data/analysis_data.csv"))
 
 ### Model data ####
-first_model <-
-  stan_glm(
-    formula = flying_time ~ length + width,
-    data = analysis_data,
-    family = gaussian(),
-    prior = normal(location = 0, scale = 2.5, autoscale = TRUE),
-    prior_intercept = normal(location = 0, scale = 2.5, autoscale = TRUE),
-    prior_aux = exponential(rate = 1, autoscale = TRUE),
-    seed = 853
-  )
+cause_of_death_poisson <- stan_glm(
+  total_deaths ~ cause,
+  data = filtered_data,
+  family = poisson(link = "log"),
+  seed = 853,
+  refresh = 0
+)
 
+#Comparing the graphs
+cause_of_death_neg_binomial <- stan_glm(
+  total_deaths ~ cause,
+  data = filtered_data,
+  family = neg_binomial_2(link = "log"),
+  seed = 853,
+  refresh = 0
+)
 
+## I generated the models inside the actual graphs so i have no idea if the code below works since I never ran it
 #### Save model ####
 saveRDS(
   first_model,
