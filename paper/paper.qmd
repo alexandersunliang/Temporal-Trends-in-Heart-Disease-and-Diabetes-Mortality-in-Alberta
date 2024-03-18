@@ -1,11 +1,11 @@
 ---
-title: "Temporal Trends in Heart Disease and Diabetes Mortality in Alberta: A Negative Binomial Regression Analysis of the Impact of Fast Food Consumption"
+title: "Temporal Trends in Heart Disease and Diabetes Mortality in Alberta: A comparison between Poisson and Negative Binomial techniques"
 author: 
   - "Alexander Sun"
 thanks: "https://github.com/alexandersunliang/Temporal-Trends-in-Heart-Disease-and-Diabetes-Mortality-in-Alberta.git"
 date: today
 date-format: long
-abstract: "In this study, we analyzed mortality data from Alberta, Canada, focusing on the effects of heart disease and diabetes from 2016 to 2021, amidst increasing fast food consumption. Our findings, using negative binomial regression models, indicate that while heart disease is positively associated with mortality rates, diabetes, and other cardiovascular conditions are linked to lower mortality rates relative to the baseline, suggesting effective management of these conditions over time. This research illustrates the complex relationship between diseases and health outcomes, highlighting balance between medical advancement and deteriorating dietary habits. By shedding light on these temporal trends, our study contributes to a broader understanding of how diet influences the prevalence and mortality rates of heart disease and diabetes, reinforcing the importance of dietary education and regulation in public health initiatives."
+abstract: "In this study, we analyzed mortality data from Alberta, Canada, focusing on the effects of heart disease and diabetes from 2016 to 2021, amidst increasing fast food consumption. Our findings, using Poisson and negative binomial regression models, indicate that while heart disease is positively associated with mortality rates, diabetes, and other cardiovascular conditions are linked to lower mortality rates relative to the baseline, suggesting effective management of these conditions over time. This research illustrates the complex relationship between diseases and health outcomes, highlighting balance between medical advancement and deteriorating dietary habits. By shedding light on these temporal trends, our study contributes to a broader understanding of how diet influences the prevalence and mortality rates of heart disease and diabetes, reinforcing the importance of dietary education and regulation in public health initiatives."
 format: pdf
 toc: true
 number-sections: true
@@ -31,26 +31,26 @@ library(broom.mixed)
 filtered_data <- read.csv(here("data/analysis_data/analysis_data.csv"))
 ```
 
+\newpage
 
 # Introduction {#sec-intro}
  
 
 In recent decades, the prevalence of heart disease and diabetes has surged globally, a trend paralleled by the increasing consumption of fast food [@heartdisease]. This paper focuses on Alberta, Canada, where these health challenges have become particularly pronounced. While numerous studies have linked fast food consumption to various health outcomes, few have directly examined how mortality rates from heart disease and diabetes have changed within this region. This gap in research motivates our study, which aims to analyze trends in these mortality rates and discuss their potential association with the rise in fast food consumption, despite the absence of direct consumption data.
 
-Using mortality data from the Alberta government, spanning two decades, we applied negative binomial regression models to analyze changes in heart disease and diabetes mortality rates [@Alberta]. Our findings reveal significant trends in these rates, with notable increases that correspond to periods of reported national and global rises in fast food consumption. While direct causation cannot be established due to the lack of specific consumption data, the correlations emphasize the potential health impacts of dietary habits.
+Using mortality data from the Alberta government, spanning two decades, we applied both Poisson and negative binomial regression models to analyze changes in heart disease and diabetes mortality rates [@Alberta]. Our findings reveal significant trends in these rates, with notable increases that correspond to periods of reported national and global rises in fast food consumption and COVID-19. While direct causation cannot be established due to the lack of specific consumption data, the correlations emphasize the potential health impacts of dietary habits.
 
-The importance of this research lies in its contribution to the ongoing dialogue about public health strategies aimed at combating heart disease and diabetes. By highlighting the temporal association between increased mortality rates and the era of rising fast food consumption, this study emphasizes the need for targeted public health interventions and policies. Furthermore, by focusing on the past five years, we can further analyze the effects of COVID-19 on heart-related diseases and diabetes.
+The importance of this research lies in its contribution to the ongoing dialogue about public health strategies aimed at combating heart disease and diabetes. By highlighting the temporal association between increased mortality rates and the era of rising fast food consumption, this study emphasizes the need for targeted public health interventions and policies. Furthermore, by focusing on the past five years, we can further investigate the potential correlation between COVID-19 and heart-related diseases/diabetes.
 
 This paper is organized as follows: Following the introduction, the second section provides an overview of our dataset, variables, and a general analysis of the data, establishing the theoretical foundation for the study. The third section describes the model, including the rationale behind the choice of negative binomial regression. The fourth section presents our findings, detailing the effects of our various illnesses on mortality rates. The fifth section discusses the implications of these findings for public health policy and suggests directions for future research. For this study, the estimand is the effect of heart diseases and diabetes on mortality rates.
 
 Our goal is to provide an insight into how large macro-events from the past few years may have changed the mortality rates of diseases correlated with unhealthy eating.
 
 
-
 # Data {#sec-data}
 
 ## Data source
-This analysis will be carried out in R [@citeR] using packages tidyverse [@tidyverse], rstanarm [@Rstanarm], dplyr [@Dplyr], ggplot2 [@Ggplot2], knitr [@Knitr], gridextra[@gridextra], bayesplot[@bayesplot], and modelsummary [@modelsum]. The data set used in this paper is called Leading causes of death and was collected from the Alberta Provincial Government [@Alberta]. The data set consists of a ranking of the 30 most common causes of death each year in Alberta. The government collected this data using death certificates from all over the province, making the information reasonably reliable and accurate. The data covers the last two decades, but for our research purpose we will focus on the last five years.
+This analysis will be carried out in R [@citeR] using packages tidyverse [@tidyverse], rstanarm [@Rstanarm], dplyr [@Dplyr], ggplot2 [@Ggplot2], knitr [@Knitr], gridextra[@gridextra], bayesplot[@bayesplot], and modelsummary [@modelsum]. The data set used in this paper is called *Leading causes of death* and was collected from the Alberta Provincial Government [@Alberta]. The data set consists of a ranking of the 30 most common causes of death each year in Alberta. The government collected this data using death certificates from all over the province, making the information reasonably reliable and accurate. The data covers the last two decades, but for our research purpose we will focus on the last five years.
 
 ## Broader Context of the Dataset
 The availability of detailed public health data, such as the mortality statistics from Alberta, is crucial for the formulation of informed public health policies and strategies. Within the broader Canadian context, Alberta's commitment to data transparency enables a deeper analysis of health trends and outcomes, serving as a model for other provinces and territories. The analysis of mortality data plays a pivotal role in identifying health trends, assessing the burden of diseases, and planning public health interventions. By focusing on specific causes of death, researchers and policymakers can tailor strategies to target the underlying factors contributing to these trends, ultimately aiming to improve health outcomes and reduce preventable deaths.
@@ -66,10 +66,12 @@ Causes of Death: Specifically, the dataset categorizes mortality into detailed c
 - **Diabetes Mellitus**: Mortality attributed to complications arising from diabetes, a chronic condition affecting blood sugar regulation.
 - **Congestive Heart Failure**: Deaths resulting from the heart's inability to pump blood effectively, often a consequence of other heart conditions.
 
-These five causes of death were chosen due to their correlation with unhealthy diets. We collected the recorded total deaths in Alberta from each of the above variables from 2016-2021 inclusive. This is shown in Table 1
+These five causes of death were chosen due to their correlation with unhealthy diets. We collected the recorded total deaths in Alberta from each of the above variables from 2016-2021 inclusive. This is shown in @tbl-cause.
+
 ```{r}
 #| echo: false
-
+#| tbl-cap: Yearly death counts for various heart diseases and diabetes
+#| label: tbl-cause
 # Creating a tibble consisting of our information and names. Could have done this with the filtered_data we generated but it was bugging out for some reason so just decided to do it manually
 summary_table <- tibble(
   Year = rep(2016:2021, times = 5),
@@ -87,10 +89,11 @@ summary_table <- tibble(
   pivot_wider(names_from = Cause_of_Death, values_from = Total_Deaths) %>%
   select(Year, "Acute Myocardial Infarction", "All Other Forms of Ischemic Heart Disease",
          "Atherosclerotic Cardiovascular Disease", "Diabetes Mellitus", "Congestive Heart Failure")
-kable(summary_table, format = "latex", booktabs = TRUE, caption = "Annual Deaths by Cause (2016-2021)") %>%
+kable(summary_table, format = "latex", booktabs = TRUE,) %>%
   kable_styling(latex_options = c("striped", "scale_down"))
 # Generating the table
 ```
+
 
 ## Data Preparation and Cleaning
 The dataset was filtered to isolate deaths attributed to our causes of interest: acute myocardial infarction, all other forms of ischemic heart disease, atherosclerotic cardiovascular disease, diabetes mellitus, and congestive heart failure. This selection was crucial to align our study with its objectives, ensuring a focused examination of these specific health outcomes. Subsequently, we removed all missing values from the dataset. The final data points were compiled for use in our analysis later in the paper.
@@ -116,22 +119,20 @@ ggplot(filtered_data, aes(x = calendar_year, y = total_deaths, color = cause, gr
   ) +
   scale_x_continuous(breaks = seq(min(filtered_data$calendar_year), max(filtered_data$calendar_year), by = 1)) # Ensure every year is shown
 ```
-From the graph depicted above, we see that although most causes kept their total death count per year roughly the same, Diabetes saw a noticeable spike form 2020 onwards and Atheroscleratic cardiovascular disease saw a significant decrease. 
+From @fig-overview-line, we see that although most causes kept their total death count per year roughly the same, Diabetes saw a noticeable spike form 2020 onwards and Atheroscleratic cardiovascular disease saw a significant decrease. 
 
 # Model {#sec-model}
 
-In the realm of statistical modeling for count data, both the Poisson and Negative Binomial models are popular choices, each with its assumptions, benefits, and drawbacks. These models serve to elucidate the relationship between a set of predictors—in this case, the causes of death—and the count response variable, which is the total number of deaths.
+In the realm of statistical modeling for count data, both the Poisson and Negative Binomial models are popular choices, each with its assumptions, benefits, and drawbacks. These models serve to elucidate the relationship between a set of predictors—in this case, the causes of death—and the count response variable, which is the total number of deaths per year.
 
-The Poisson regression model is based on the assumption that the count of events follows a Poisson distribution, characterized by the property that its mean is equal to its variance (equidispersion). This assumption is suitable for datasets where the occurrence of events is rare and independent over a fixed period or space, such as the number of deaths in a small population or rare diseases. The simplicity of the Poisson model lies in its single parameter, making it computationally efficient and easy to interpret. However, this simplicity also constitutes a limitation, particularly when it comes to overdispersion—a scenario often encountered in real-world data where the variance exceeds the mean due to heterogeneity in the data. When overdispersion is present, the Poisson model can underestimate the standard errors of the estimated coefficients, leading to an overstatement of the statistical significance of predictors.
+The Poisson regression model is based on the assumption that the count of events follows a Poisson distribution, meaning its mean is equal to its variance. This assumption is suitable for datasets where the occurrence of events is rare and independent over a fixed period or space, such as the number of deaths in a small population or rare diseases. The simplicity of the Poisson model lies in its single parameter, making it computationally efficient and easy to interpret. However, this simplicity also constitutes a limitation, particularly when it comes to overdispersion—a scenario often encountered in real-world data where the variance exceeds the mean due to heterogeneity in the data. When overdispersion is present, the Poisson model can underestimate the standard errors of the estimated coefficients, leading to an overstatement of the statistical significance of predictors.
 
 In contrast, the Negative Binomial model adds an extra parameter to account for overdispersion, offering a more flexible fit for count data that exhibit greater variability. This model is especially apt when the data are counts of events that can occur more frequently than a rare event and when these counts have high variance. It can handle data from populations with heterogeneity that the Poisson model cannot accommodate. This flexibility comes with a trade-off in terms of increased model complexity and computational demand. The added dispersion parameter means that the Negative Binomial model has one more degree of freedom than the Poisson model, which can result in a better fit but also requires careful interpretation of the additional parameter.
 
-For the current paper focusing on mortality rates due to diabetes and heart disease, it is imperative to choose a model that accurately reflects the underlying data distribution. If the mortality counts are subject to overdispersion, the Negative Binomial model would likely provide a more accurate representation of the data, enabling more reliable statistical inferences. For instance, if certain causes of death are more prevalent or exhibit more variability from year to year, the Negative Binomial model's capacity to incorporate this variability would make it a superior choice over the Poisson model.
-
-Ultimately, the selection between the two models should be guided by diagnostic checks, such as the dispersion parameter and goodness-of-fit tests. For example, if the model comparison indicates a better fit for the Negative Binomial model and significant overdispersion in the Poisson model, it would justify the selection of the Negative Binomial model for the analysis. Additionally, both Akaike Information Criterion (AIC) and Bayesian Information Criterion (BIC) can be instrumental in determining which model is more appropriate for the data at hand. These criteria consider both the likelihood of the data given the model and the complexity of the model, thus providing a balance between fit and parsimony.
+For the current paper focusing on mortality rates due to diabetes and heart disease, it is imperative to choose a model that accurately reflects the underlying data distribution. If the mortality counts are subject to overdispersion, the Negative Binomial model would likely provide a more accurate representation of the data, enabling more reliable statistical inferences. For instance, if certain causes of death are more prevalent or exhibit more variability from year to year, the Negative Binomial model's capacity to incorporate this variability would make it a superior choice over the Poisson model. Ultimately, the selection between the two models should be guided by diagnostic checks, such as the dispersion parameter and goodness-of-fit tests.
 
 ## Poisson Model
-The Poisson regression model is characterized by its simplicity and efficiency in modeling the count data. It assumes that the event occurrence rate is constant across the observed period and that these events occur independently of each other. Despite its advantages, the Poisson model may fall short in handling overdispersion, where the variance exceeds the mean in the count data.
+Listed below is what an example Poisson model would look like if applied to our scenario.
 $$
 y_i | \lambda_i \sim \text{Poisson}(\lambda_i)
 $$
@@ -169,7 +170,9 @@ Since we have two potential methods of modeling, we can directly compare the two
 
 ```{r}
 #| echo: false
-
+#| warning: false
+#| label: tbl-sumcause
+#| tbl-cap: "Summary Statistics of the Number of Yearly Deaths by Cause"
 # Generating the summary statistics 
 summary_stats <- filtered_data %>%
   summarise(
@@ -181,12 +184,12 @@ summary_stats <- filtered_data %>%
     N = n()
   )
 # Generating the kable table
-kable(summary_stats, caption = "Summary Statistics of the Number of Yearly Deaths by Cause", 
+kable(summary_stats, 
       col.names = c("Minimum", "Mean", "Maximum", "Standard Deviation", "Variance", "Count"), 
       align = 'c') %>%
   kable_styling(latex_options = c("striped", "hold_position"))
 ```
-From the table above, we see that the variance is significantly off of the mean. Therefore, the primary assumption for applying a Poisson model where the variance is equal to the mean does not hold. From this alone, we can reasonably conclude that a negative binomial model most likely fits our purpose of estimating the total death count per year better due to accounting for overdispersion with the $\mu_i$ variable. 
+From @tbl-sumcause, we see that the variance is significantly off of the mean. Therefore, the primary assumption for applying a Poisson model where the variance is equal to the mean does not hold. From this alone, we can reasonably conclude that a negative binomial model most likely fits our purpose of estimating the total death count per year better due to accounting for overdispersion with the $\mu_i$ variable. 
 ```{r}
 #| echo: false
 #| message: false
@@ -213,11 +216,11 @@ cause_of_death_neg_binomial <- stan_glm(
 ```
 # Results {#sec-results}
 
-Our results are summarized in the table below. 
-
 ```{r}
 #| echo: false
 #| warning: false
+#| tbl-cap: "Regression coefficients for Poisson and Negative Binomial"
+#| label: tbl-regression
 poisson_summary <- tidy(cause_of_death_poisson)
 negbin_summary <- tidy(cause_of_death_neg_binomial)
 
@@ -233,7 +236,7 @@ modelsummary(
 )
 ```
 
-The table presents a comparative summary of the regression results obtained from the Poisson and Negative Binomial models. The comparison is based on a dataset of mortality rates due to various causes of heart disease and diabetes. The table provides estimates of the regression coefficients, along with their standard errors (in parentheses), for each cause of death, as well as several model diagnostics.
+@tbl-regression presents a comparative summary of the regression results obtained from the Poisson and Negative Binomial models. The comparison is based on a dataset of mortality rates due to various causes of heart disease and diabetes. The table provides estimates of the regression coefficients, along with their standard errors (in parentheses), for each cause of death, as well as several model diagnostics.
 
 **Intercept:** Both models show a large positive intercept, implying a high baseline number of deaths when all other variables are at zero. This suggests that there are other factors contributing to mortality rates that are not included in the model.
 
